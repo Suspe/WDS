@@ -172,9 +172,9 @@ void Dialog::calc_xy_angles(void){
 
 void Dialog::readData()
     {
-    proba=Xacc;
+
     Dialog::update();
-    Sleep(100);
+    //Sleep(100);
         const QByteArray data = serial->readAll();
         QDataStream input(serial->readAll());
         QByteArray ba;
