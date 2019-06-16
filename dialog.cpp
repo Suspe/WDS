@@ -69,6 +69,8 @@ Dialog::~Dialog()
 
 void Dialog::paintEvent(QPaintEvent *e)
 {
+
+
     QPainter painter(this);
     painter.device()->width();
 
@@ -113,6 +115,53 @@ void Dialog::paintEvent(QPaintEvent *e)
     path_tr.addPolygon(tr_bot);
     path_tr.addPolygon(tr_top);
 
+    // IMITACJA PIASKU
+    check_state();
+    if (Zacc > 0){
+        if(licznik > 40000000) {
+        licznik -= 20000000;
+        }}
+    else {
+            if (licznik < 4200000000)licznik += 20000000;
+        }
+
+    QPointF ctr1_spada(center.x(), center.y()),
+            pt11_spada(center.x()+80-off, center.y()-80+off),
+            pt12_spada(center.x()-80+off, center.y()-80+off),
+            ctr2_spada(center.x(), center.y()+80-off),
+            pt21_spada(center.x()+off, center.y()+80),
+            pt22_spada(center.x()-off, center.y()+80);
+
+    QPolygonF gora_spada;
+    QPolygonF dol_spada;
+
+    gora_spada << ctr1_spada << pt11_spada << pt12_spada << ctr1_spada;
+    dol_spada << ctr2_spada << pt21_spada << pt22_spada << ctr2_spada;
+
+    QPointF ctr1_dogory(center.x(), center.y()),
+            pt11_dogory(center.x()+80-off, center.y()-80),
+            pt12_dogory(center.x()-80+off, center.y()-80),
+            ctr2_dogory(center.x(), center.y()-off),
+            pt21_dogory(center.x()+off, center.y()+off),
+            pt22_dogory(center.x()-off, center.y()+off);
+
+    QPolygonF gora_dogory;
+    QPolygonF dol_dogory;
+
+    gora_dogory << ctr2_dogory << pt11_dogory << pt12_dogory << ctr2_dogory;
+    dol_dogory << ctr1_dogory << pt21_dogory << pt22_dogory << ctr1_dogory;
+
+
+    QBrush piasek;
+    piasek.setColor(Qt::yellow);
+    piasek.setStyle(Qt::Dense3Pattern);
+    QPainterPath path_piasek_spada;
+    QPainterPath path_piasek_dogory;
+    path_piasek_dogory.addPolygon(gora_dogory);
+    path_piasek_dogory.addPolygon(dol_dogory);
+    path_piasek_spada.addPolygon(gora_spada);
+    path_piasek_spada.addPolygon(dol_spada);
+
 
     painter.translate(center.x(),center.y());
     if (Zacc>0)painter.rotate(Yacc_angle);
@@ -128,13 +177,24 @@ void Dialog::paintEvent(QPaintEvent *e)
     painter.drawPolygon(rec_bot);
     painter.drawPolygon(tr_top);
     painter.drawPolygon(tr_bot);
-
-
     painter.fillPath(path_rec, fill1);
     painter.fillPath(path_tr, fill2);
 
+   if (Zacc > 0){
+    painter.drawPolygon(gora_spada);
+    painter.drawPolygon(dol_spada);
+    painter.fillPath(path_piasek_spada, piasek);
+    }
+   else {
+    painter.drawPolygon(gora_dogory);
+    painter.drawPolygon(dol_dogory);
+    painter.fillPath(path_piasek_dogory, piasek);
+   }
 
 }
+
+
+
 
 
 void Dialog::calc_xy_angles(void){
@@ -143,9 +203,9 @@ void Dialog::calc_xy_angles(void){
    double x2, y2, z2; //24 bit
 
    // Lets get the deviations from our baseline
-   x_val = Xacc_g-Xacc_center;
-   y_val = Yacc_g-Yacc_center;
-   z_val = Zacc_g-Zacc_center;
+   x_val = Xacc_g;
+   y_val = Yacc_g;
+   z_val = Zacc_g;
 
    // Work out the squares
    x2 = x_val*x_val;
@@ -169,6 +229,23 @@ void Dialog::calc_xy_angles(void){
    Yacc_angle = atan(result);
    Yacc_angle = Yacc_angle * 180 /3.1415;
 }
+
+void Dialog::check_state()
+{   int stan = whichRange(licznik);
+    if (stan < 6 && stan > 0) off = (stan - 1)*20;
+    else qDebug() << "blad stan" << endl;
+}
+
+int Dialog::whichRange(unsigned long int licznik)
+{
+    if ( licznik <= 858993459)                          return 5;
+    if ( licznik >  858993459 && licznik <= 1717986918) return 4;
+    if ( licznik > 1717986918 && licznik <= 2576980377) return 3;
+    if ( licznik > 2576980377 && licznik <= 3865470565) return 2;
+    if ( licznik > 3865470565)                          return 1;
+
+}
+
 
 void Dialog::readData()
     {
@@ -195,20 +272,14 @@ void Dialog::readData()
             qDebug() << "blad komuinkacji" << endl;
         }
 
-        else {
-            if (check){
-                Xacc_center = Xacc_g;
-                Yacc_center = Yacc_g;
-                Zacc_center = Zacc_g;
-                check = 0;
-            }
+
         Xacc_g = ((float) Xacc * LSM303_ACC_RESOLUTION) / (float) INT16_MAX;
         Yacc_g = ((float) Yacc * LSM303_ACC_RESOLUTION) / (float) INT16_MAX;
         Zacc_g = ((float) Zacc * LSM303_ACC_RESOLUTION) / (float) INT16_MAX;
 
         calc_xy_angles();
-         // qDebug() << Yacc_angle <<endl;// " " << Xacc_angle<<endl;// << " " << Zacc  << endl;
+          // " " << Xacc_angle<<endl;// << " " << Zacc  << endl;
         }
 
-    }
+
 

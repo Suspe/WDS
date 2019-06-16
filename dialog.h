@@ -5,6 +5,7 @@
 #include <QtGui>
 #include <QtCore>
 #include <QtSerialPort/qserialport.h>
+#include <limits.h>
 
 
 
@@ -21,6 +22,9 @@ public:
     ~Dialog();
     void readData();
     void calc_xy_angles(void);
+    void check_state();
+    void dogory();
+    int whichRange(unsigned long int);
 
 private:
     Ui::Dialog *ui;
@@ -32,6 +36,10 @@ private:
     char buffer[50];
     qint16 Xacc, Yacc, Zacc;
     char znak;
+    unsigned long int licznik =UINT_MAX;
+    int off = 4;
+
+
     qint32 suma;
     float Xacc_g, Yacc_g, Zacc_g;
     bool check = 1;
