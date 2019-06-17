@@ -116,15 +116,22 @@ void Dialog::paintEvent(QPaintEvent *e)
     path_tr.addPolygon(tr_top);
 
     // IMITACJA PIASKU
-    check_state();
-    if (Zacc > 0){
-        if(licznik > 40000000) {
-        licznik -= 20000000;
-        }}
-    else {
-            if (licznik < 4200000000)licznik += 20000000;
-        }
 
+    if (Zacc > 0){
+        if(licznik > 20000000) {
+        licznik -=   20000000;
+        }else {
+        licznik = 0;
+}}
+    else {
+            if (licznik < 4274000000)licznik += 20000000;
+            else licznik = 4294967295;
+
+        }
+//check_state();
+    off = 80 - (((double)licznik/4294967295.0) * 80.0);
+
+    qDebug() << off << endl;
     QPointF ctr1_spada(center.x(), center.y()),
             pt11_spada(center.x()+80-off, center.y()-80+off),
             pt12_spada(center.x()-80+off, center.y()-80+off),
@@ -190,6 +197,7 @@ void Dialog::paintEvent(QPaintEvent *e)
     painter.drawPolygon(dol_dogory);
     painter.fillPath(path_piasek_dogory, piasek);
    }
+//   qDebug() << licznik << " " << Zacc << endl;
 
 }
 
@@ -230,10 +238,13 @@ void Dialog::calc_xy_angles(void){
    Yacc_angle = Yacc_angle * 180 /3.1415;
 }
 
-void Dialog::check_state()
-{   int stan = whichRange(licznik);
-    if (stan < 6 && stan > 0) off = (stan - 1)*20;
-    else qDebug() << "blad stan" << endl;
+//void Dialog::check_state()
+//{   int stan = whichRange(licznik);
+//    if (stan < 6 && stan > 0) off = (stan - 1)*20;
+//    else qDebug() << "blad stan" << endl;
+//}
+void Dialog::check_state(){
+    off = (double)(licznik/4294967295) * 80.0;
 }
 
 int Dialog::whichRange(unsigned long int licznik)

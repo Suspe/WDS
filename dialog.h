@@ -37,7 +37,7 @@ private:
     qint16 Xacc, Yacc, Zacc;
     char znak;
     unsigned long int licznik =UINT_MAX;
-    int off = 4;
+    double off = 80;
 
 
     qint32 suma;
